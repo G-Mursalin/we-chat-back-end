@@ -1,8 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const tourRoute = require("./routes/tourRoute");
-const userRoute = require("./routes/userRoute");
+const peopleRoute = require("./routes/peopleRoute");
 const AppError = require("./utils/appError");
 const { globalErrorController } = require("./controllers/errorController");
 const cookieParser = require("cookie-parser");
@@ -11,10 +10,10 @@ const cookieParser = require("cookie-parser");
 app.use(express.json());
 app.use(cors());
 app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use("/avatar", express.static("avatar"));
 
 //Routs
-app.use("/api/v1/tours", tourRoute);
-app.use("/api/v1/users", userRoute);
+app.use("/api/v1/users", peopleRoute);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't not fine ${req.originalUrl} on this server`, 404));

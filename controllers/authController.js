@@ -1,4 +1,4 @@
-const User = require("./../models/userModel");
+const People = require("../models/peopleModel");
 const { promisify } = require("util");
 const { catchAsync } = require("../utils/catchAsync");
 const jwt = require("jsonwebtoken");
@@ -13,10 +13,10 @@ const createToken = (id) => {
 
 //Controllers
 const signUp = catchAsync(async (req, res, next) => {
-  // const newUser = await User.create(req.body);
+  // const newUser = awaitPeople.create(req.body);
   // const { name, email, password, passwordConfirm } = req.body;
-  // const newUser = await User.create({ name, email, password, passwordConfirm });
-  const newUser = await User.create(req.body);
+  // const newUser = awaitPeople.create({ name, email, password, passwordConfirm });
+  const newUser = awaitPeople.create(req.body);
   newUser.password = undefined;
 
   const token = createToken(newUser._id);
@@ -37,9 +37,9 @@ const logIn = catchAsync(async (req, res, next) => {
     return next(new AppError("Please provide email and password", 400));
   }
 
-  const user = await User.findOne({ email }).select("+password");
+  const user = awaitPeople.findOne({ email }).select("+password");
 
-  if (!user || !(await user.isPasswordCorrect(password, user.password))) {
+  if (!user || !awaitPeople.isPasswordCorrect(password, People.password)) {
     return next(new AppError("Invalid email or password", 401));
   }
 
@@ -72,7 +72,7 @@ const protect = catchAsync(async (req, res, next) => {
     process.env.JWT_SECRET
   );
 
-  const freshUser = await User.findById(decodedToken.id);
+  const freshUser = awaitPeople.findById(decodedToken.id);
   if (!freshUser) {
     return next(new AppError("This user does not exist", 401));
   }
