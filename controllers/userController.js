@@ -17,13 +17,25 @@ const createUploadedImageURL = (req, res, next) => {
 const deleteUploadedImageIfUserExist = async (req, res, next) => {
   const isExist = await People.findOne({ email: req.body.email });
   if (isExist) {
-    fs.unlink("${__dirname}/../avatar/" + req.file.filename, (err) => {
-      if (err) {
-        next();
-      }
-      next();
-    });
+    fs.unlink("${__dirname}/../avatar/" + req.file.filename, (err) => {});
   }
+  next();
+};
+
+const deleteUploadedImageIfAdminDeleteTheUser = async (req, res, next) => {
+  const user = await People.findById(req.params.id);
+
+  if (!user) {
+    return next(new AppError("No tour found with that ID", 404));
+  }
+
+  const userImageUrl = user.imgURL;
+  const url = req.protocol + "://" + req.get("host");
+
+  const path = userImageUrl.replace(url, "");
+
+  fs.unlink(`${__dirname}/..${path}`, (err) => {});
+
   next();
 };
 
@@ -89,7 +101,7 @@ const postAUser = catchAsync(async (req, res, next) => {
   });
 });
 
-const deleteAUser = catchAsync(async (req, res) => {
+const deleteAUser = catchAsync(async (req, res, next) => {
   const user = await People.findByIdAndDelete(req.params.id);
 
   if (!user) {
@@ -108,4 +120,5 @@ module.exports = {
   upload,
   createUploadedImageURL,
   deleteUploadedImageIfUserExist,
+  deleteUploadedImageIfAdminDeleteTheUser,
 };
