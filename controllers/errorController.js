@@ -2,6 +2,7 @@ const AppError = require("./../utils/appError");
 
 const sendResponse = (error, res) => {
   if (!error.isOperational) {
+    console.log(error);
     return res.status(500).send({
       status: "error",
       message: "Something went wrong!",
@@ -26,10 +27,10 @@ const globalErrorController = (err, req, res, next) => {
 
   if (err.code === 11000) {
     error = new AppError(
-      `Duplicate field value ${err.message.match(
+      `${err.message.match(
         /(["'])(?:(?=(\\?))\2.)*?\1/g
-      )}. Please use another value!`,
-      400
+      )} already in used. Please use another value!`,
+      409
     );
 
     return sendResponse(error, res);

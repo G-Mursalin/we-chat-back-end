@@ -1,8 +1,31 @@
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 const validator = require("validator");
 const People = require("../models/peopleModel");
+const AppError = require("../utils/appError");
 const { catchAsync } = require("../utils/catchAsync");
+
+// Middlewares
+
+const createUploadedImageURL = (req, res, next) => {
+  const url = req.protocol + "://" + req.get("host");
+  req.imgURL = url + "/avatar/" + req.file.filename;
+  next();
+};
+
+const deleteUploadedImageIfUserExist = async (req, res, next) => {
+  const isExist = await People.findOne({ email: req.body.email });
+  if (isExist) {
+    fs.unlink("${__dirname}/../avatar/" + req.file.filename, (err) => {
+      if (err) {
+        next();
+      }
+      next();
+    });
+  }
+  next();
+};
 
 // ***********Image Upload
 const UPLOAD_FOLDER = `${__dirname}/../avatar/`;
@@ -48,18 +71,17 @@ const getAllUsers = catchAsync(async (req, res) => {
   });
 });
 
-const postAUser = catchAsync(async (req, res) => {
-  const url = req.protocol + "://" + req.get("host");
-  const imgURL = url + "/avatar/" + req.file.filename;
+const postAUser = catchAsync(async (req, res, next) => {
   const { name, email, mobile, password } = req.body;
+
   const newUser = await People.create({
     name,
     email,
     mobile,
     password,
-    imgURL,
+    imgURL: req.imgURL,
   });
-  res.status(200).send({
+  res.status(201).send({
     status: "success",
     data: {
       user: newUser,
@@ -84,4 +106,6 @@ module.exports = {
   postAUser,
   deleteAUser,
   upload,
+  createUploadedImageURL,
+  deleteUploadedImageIfUserExist,
 };

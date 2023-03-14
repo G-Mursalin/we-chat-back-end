@@ -26,6 +26,7 @@ const peopleSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please provide a password"],
       minLength: 6,
+      select: false,
     },
     imgURL: {
       type: String,
